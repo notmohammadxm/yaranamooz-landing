@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>یاران آموز | سامانه آموزشی هوشمند</title>
+<meta name="description" content="یاران آموز، سامانه آموزشی هوشمند برای آزمون، رتبه‌بندی و یادگیری بهتر"/>
+<meta name="theme-color" content="#1E3A8A"/>
+<style>
+@font-face{font-family:'Yaran';src:url('./assets/font/Yaran.woff2') format('woff2-variations');font-weight:100 900;font-display:swap}
+:root{--primary:#1E3A8A;--primary-hover:#1E40AF;--primary-glow:rgba(30,58,138,.15);--primary-light:#DBEAFE;--bg:#F5F7FB;--bg-grad-start:#EEF2FF;--bg-grad-end:#EFF6FF;--surface:#FFFFFF;--text:#0F172A;--text-muted:#64748B;--text-light:#94A3B8;--border:#E2E8F0;--success:#059669;--warning:#F59E0B;--info:#0EA5E9;--radius-sm:10px;--radius-md:16px;--radius-lg:24px;--radius-xl:32px;--shadow-sm:0 4px 16px rgba(15,23,42,.06);--shadow-md:0 12px 40px rgba(15,23,42,.09);--shadow-lg:0 24px 56px rgba(15,23,42,.12);--font:'Yaran','Vazir','IRANSans',Tahoma,sans-serif;--ease:cubic-bezier(.4,0,.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);font-size:15px;line-height:1.8;color:var(--text);background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+img{max-width:100%;display:block}
+::selection{background:var(--primary);color:#fff}
+.bg-canvas{position:fixed;inset:0;z-index:-2;background:linear-gradient(160deg,var(--bg-grad-start) 0%,var(--bg) 40%,var(--bg-grad-end) 100%)}
+.bg-dots{position:fixed;inset:0;z-index:-1;background-image:radial-gradient(circle,rgba(30,58,138,.06) 1px,transparent 1px);background-size:32px 32px}
+.blob{position:fixed;border-radius:50%;filter:blur(100px);z-index:-1;will-change:transform}
+.blob-1{width:600px;height:600px;background:rgba(59,130,246,.12);top:-200px;right:-150px;animation:bfloat1 20s ease-in-out infinite}
+.blob-2{width:500px;height:500px;background:rgba(99,102,241,.1);bottom:-180px;left:-120px;animation:bfloat2 24s ease-in-out infinite}
+.blob-3{width:400px;height:400px;background:rgba(14,165,233,.08);top:45%;left:55%;animation:bfloat3 28s ease-in-out infinite}
+@keyframes bfloat1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-80px,60px) scale(1.1)}66%{transform:translate(50px,-40px) scale(.95)}}
+@keyframes bfloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(70px,-80px) scale(1.08)}}
+@keyframes bfloat3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-45%,-55%) scale(1.12)}}
+.nav{position:fixed;top:0;right:0;left:0;z-index:100;padding:12px 24px;transition:all .4s var(--ease)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.8);border-radius:var(--radius-lg);padding:12px 28px;box-shadow:var(--shadow-sm);transition:all .4s var(--ease)}
+.nav.scrolled .nav-inner{box-shadow:var(--shadow-md);border-color:rgba(30,58,138,.08)}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:12px;display:grid;place-items:center;color:#fff;flex-shrink:0}
+.nav-logo svg{width:22px;height:22px}
+.nav-name{font-size:17px;font-weight:800;color:var(--primary)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--text-muted);transition:all .25s var(--ease)}
+.nav-link:hover{color:var(--primary);background:var(--primary-glow)}
+.nav-cta{padding:10px 24px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#fff;border-radius:var(--radius-sm);font-size:13px;font-weight:700;transition:all .3s var(--ease);box-shadow:0 4px 16px -4px var(--primary-glow)}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px -4px var(--primary-glow)}
+.nav-mobile-btn{display:none;width:42px;height:42px;border-radius:var(--radius-sm);color:var(--text);place-items:center}
+.nav-mobile-btn svg{width:22px;height:22px}
+.nav-mobile-menu{display:none;position:fixed;top:0;right:0;left:0;bottom:0;background:rgba(255,255,255,.97);backdrop-filter:blur(24px);z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;visibility:hidden;transition:all .4s var(--ease)}
+.nav-mobile-menu.open{opacity:1;visibility:visible}
+.nav-mobile-menu a{font-size:18px;font-weight:700;color:var(--text);padding:14px 32px;border-radius:var(--radius-md);transition:all .25s}
+.nav-mobile-menu a:hover{color:var(--primary);background:var(--primary-glow)}
+.nav-mobile-close{position:absolute;top:24px;left:24px;width:44px;height:44px;border-radius:50%;background:var(--primary-glow);color:var(--primary);display:grid;place-items:center}
+.nav-mobile-close svg{width:20px;height:20px}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative}
+.hero-content{max-width:820px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:var(--primary-glow);border:1px solid rgba(30,58,138,.12);border-radius:999px;font-size:13px;font-weight:700;color:var(--primary);margin-bottom:28px;opacity:0;animation:fadeUp .8s var(--ease) .2s forwards}
+.hero-badge svg{width:16px;height:16px}
+.hero-title{font-size:clamp(32px,6vw,58px);font-weight:900;line-height:1.4;color:var(--text);margin-bottom:20px;opacity:0;animation:fadeUp .8s var(--ease) .4s forwards}
+.hero-title span{color:var(--primary);position:relative}
+.hero-title span::after{content:"";position:absolute;bottom:4px;right:0;left:0;height:6px;background:var(--primary-glow);border-radius:3px;z-index:-1}
+.hero-desc{font-size:clamp(15px,2vw,18px);color:var(--text-muted);max-width:600px;margin:0 auto 36px;opacity:0;animation:fadeUp .8s var(--ease) .6s forwards}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;opacity:0;animation:fadeUp .8s var(--ease) .8s forwards}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#fff;border-radius:var(--radius-md);font-size:16px;font-weight:700;transition:all .3s var(--ease);box-shadow:0 8px 28px -6px var(--primary-glow);position:relative;overflow:hidden}
+.btn-primary::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .3s}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px -6px var(--primary-glow)}
+.btn-primary:hover::before{opacity:1}
+.btn-primary svg{width:18px;height:18px;transition:transform .3s}
+.btn-primary:hover svg{transform:translateX(-4px)}
+.btn-outline{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:var(--surface);color:var(--primary);border:2px solid var(--border);border-radius:var(--radius-md);font-size:16px;font-weight:700;transition:all .3s var(--ease)}
+.btn-outline:hover{border-color:var(--primary);background:var(--primary-glow);transform:translateY(-3px)}
+.btn-outline svg{width:18px;height:18px}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-light);font-size:12px;font-weight:600;opacity:0;animation:fadeUp .8s var(--ease) 1.2s forwards}
+.hero-scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--primary),transparent);animation:scrollPulse 2s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:40px;margin-top:56px;opacity:0;animation:fadeUp .8s var(--ease) 1s forwards;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-value{font-size:28px;font-weight:900;color:var(--primary);line-height:1.2}
+.hero-stat-label{font-size:12px;color:var(--text-muted);font-weight:600;margin-top:4px}
+.section{padding:100px 24px;position:relative}
+.section-header{text-align:center;max-width:600px;margin:0 auto 64px}
+.section-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:var(--primary-glow);border-radius:999px;font-size:12px;font-weight:700;color:var(--primary);margin-bottom:16px}
+.section-tag svg{width:14px;height:14px}
+.section-title{font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--text);margin-bottom:12px;line-height:1.4}
+.section-desc{font-size:15px;color:var(--text-muted);line-height:1.8}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1200px;margin:0 auto}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;transition:all .4s var(--ease);position:relative;overflow:hidden}
+.feature-card::before{content:"";position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--info));transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease)}
+.feature-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:rgba(30,58,138,.15)}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-icon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;margin-bottom:20px;transition:all .3s var(--ease)}
+.feature-card:hover .feature-icon{transform:scale(1.1) rotate(-4deg)}
+.feature-icon svg{width:26px;height:26px}
+.fi-blue{background:var(--primary-light);color:var(--primary)}
+.fi-green{background:#D1FAE5;color:var(--success)}
+.fi-amber{background:#FEF3C7;color:var(--warning)}
+.fi-sky{background:#E0F2FE;color:var(--info)}
+.fi-purple{background:#EDE9FE;color:#7C3AED}
+.fi-rose{background:#FFE4E6;color:#E11D48}
+.feature-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:10px}
+.feature-text{font-size:13px;color:var(--text-muted);line-height:1.9}
+.steps-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.steps-container{max-width:900px;margin:0 auto}
+.step-row{display:flex;align-items:flex-start;gap:32px;padding:40px 0;position:relative}
+.step-row:not(:last-child){border-bottom:1px dashed var(--border)}
+.step-num{flex-shrink:0;width:64px;height:64px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#fff;border-radius:20px;display:grid;place-items:center;font-size:24px;font-weight:900;box-shadow:0 8px 24px -6px var(--primary-glow);transition:transform .3s var(--ease)}
+.step-row:hover .step-num{transform:scale(1.08) rotate(-3deg)}
+.step-body{flex:1}
+.step-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px}
+.step-text{font-size:14px;color:var(--text-muted);line-height:1.9}
+.showcase{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.showcase-visual{position:relative}
+.showcase-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.showcase-card::after{content:"";position:absolute;top:-60px;left:-60px;width:180px;height:180px;background:var(--primary-glow);border-radius:50%;filter:blur(40px)}
+.showcase-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.showcase-avatar{width:48px;height:48px;background:linear-gradient(135deg,var(--primary-light),#C7D2FE);border-radius:14px;display:grid;place-items:center;color:var(--primary)}
+.showcase-avatar svg{width:24px;height:24px}
+.showcase-name{font-size:15px;font-weight:700;color:var(--text)}
+.showcase-role{font-size:12px;color:var(--text-muted)}
+.showcase-bars{display:flex;flex-direction:column;gap:16px}
+.sbar{display:flex;align-items:center;gap:12px}
+.sbar-label{width:80px;font-size:12px;font-weight:600;color:var(--text-muted);text-align:left;flex-shrink:0}
+.sbar-track{flex:1;height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:5px;transition:width 1.5s var(--ease)}
+.sbar-fill.f1{width:88%;background:linear-gradient(90deg,var(--primary),#3B82F6)}
+.sbar-fill.f2{width:72%;background:linear-gradient(90deg,var(--success),#34D399)}
+.sbar-fill.f3{width:94%;background:linear-gradient(90deg,var(--warning),#FBBF24)}
+.sbar-val{width:40px;font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0}
+.showcase-mini-cards{display:flex;gap:12px;margin-top:24px}
+.smc{flex:1;background:var(--bg);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border)}
+.smc-value{font-size:20px;font-weight:900;color:var(--primary)}
+.smc-label{font-size:11px;color:var(--text-muted);font-weight:600;margin-top:2px}
+.showcase-float{position:absolute;bottom:-20px;left:-20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 20px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;animation:floatY 4s ease-in-out infinite}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.showcase-float-icon{width:36px;height:36px;background:#D1FAE5;color:var(--success);border-radius:10px;display:grid;place-items:center}
+.showcase-float-icon svg{width:18px;height:18px}
+.showcase-float-text{font-size:12px;font-weight:700;color:var(--text)}
+.showcase-float-sub{font-size:11px;color:var(--text-muted)}
+.showcase-info .section-tag{margin-bottom:12px}
+.showcase-info .section-title{margin-bottom:16px}
+.showcase-info .section-desc{margin-bottom:28px}
+.check-list{display:flex;flex-direction:column;gap:14px}
+.check-item{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--text)}
+.check-icon{width:28px;height:28px;background:var(--primary-light);color:var(--primary);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.check-icon svg{width:14px;height:14px}
+.stats-band{background:linear-gradient(135deg,var(--primary) 0%,#1E40AF 50%,#1D4ED8 100%);padding:80px 24px;position:relative;overflow:hidden}
+.stats-band::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.stats-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;position:relative;z-index:1}
+.stat-item{text-align:center;color:#fff}
+.stat-number{font-size:clamp(32px,5vw,48px);font-weight:900;line-height:1.2;margin-bottom:6px}
+.stat-label{font-size:14px;opacity:.8;font-weight:600}
+.cta-section{padding:100px 24px}
+.cta-card{max-width:900px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:64px 48px;text-align:center;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+.cta-card::before{content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;background:var(--primary-glow);border-radius:50%;filter:blur(60px)}
+.cta-card::after{content:"";position:absolute;bottom:-80px;left:-80px;width:250px;height:250px;background:rgba(14,165,233,.08);border-radius:50%;filter:blur(50px)}
+.cta-title{font-size:clamp(24px,4vw,34px);font-weight:900;color:var(--text);margin-bottom:14px;position:relative;z-index:1}
+.cta-desc{font-size:15px;color:var(--text-muted);max-width:500px;margin:0 auto 32px;position:relative;z-index:1}
+.cta-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:48px 24px 32px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:40px;flex-wrap:wrap;padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.footer-brand{display:flex;flex-direction:column;gap:12px;max-width:320px}
+.footer-brand-name{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:var(--primary)}
+.footer-brand-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:10px;display:grid;place-items:center;color:#fff}
+.footer-brand-logo svg{width:18px;height:18px}
+.footer-brand-desc{font-size:13px;color:var(--text-muted);line-height:1.8}
+.footer-links-group{display:flex;flex-direction:column;gap:8px}
+.footer-links-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px}
+.footer-link{font-size:13px;color:var(--text-muted);transition:color .2s;padding:2px 0}
+.footer-link:hover{color:var(--primary)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:var(--text-light)}
+.footer-back-top{width:40px;height:40px;background:var(--primary-glow);color:var(--primary);border-radius:var(--radius-sm);display:grid;place-items:center;transition:all .25s var(--ease)}
+.footer-back-top:hover{background:var(--primary);color:#fff;transform:translateY(-3px)}
+.footer-back-top svg{width:18px;height:18px}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){
+.nav-links{display:none}
+.nav-mobile-btn{display:grid}
+.nav-mobile-menu{display:flex}
+.showcase{grid-template-columns:1fr;gap:48px}
+.showcase-visual{order:-1}
+.showcase-float{position:relative;bottom:auto;left:auto;margin-top:16px}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.step-row{flex-direction:column;gap:16px}
+}
+@media(max-width:600px){
+.section{padding:72px 16px}
+.hero{padding:100px 16px 60px}
+.hero-stats{gap:24px}
+.features-grid{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:1fr 1fr;gap:24px}
+.cta-card{padding:48px 24px}
+.footer-top{flex-direction:column}
+.nav{padding:8px 12px}
+.nav-inner{padding:10px 16px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<div class="bg-dots"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<nav class="nav" id="nav">
+<div class="nav-inner">
+<a href="#home" class="nav-brand">
+<div class="nav-logo">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+</div>
+<span class="nav-name">یاران آموز</span>
+</a>
+<div class="nav-links">
+<a href="#home" class="nav-link">خانه</a>
+<a href="#features" class="nav-link">امکانات</a>
+<a href="#how" class="nav-link">نحوه کار</a>
+<a href="#showcase" class="nav-link">داشبورد</a>
+<a href="#cta" class="nav-cta">شروع یادگیری</a>
+</div>
+<button class="nav-mobile-btn" id="mobileMenuBtn" aria-label="منو">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+</div>
+</nav>
+<div class="nav-mobile-menu" id="mobileMenu">
+<button class="nav-mobile-close" id="mobileMenuClose" aria-label="بستن">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</button>
+<a href="#home">خانه</a>
+<a href="#features">امکانات</a>
+<a href="#how">نحوه کار</a>
+<a href="#showcase">داشبورد</a>
+<a href="#cta" style="color:var(--primary)">شروع یادگیری</a>
+</div>
+<section class="hero" id="home">
+<div class="hero-content">
+<div class="hero-badge">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+سامانه آموزشی هوشمند
+</div>
+<h1 class="hero-title">یادگیری را با <span>یاران آموز</span><br>متفاوت تجربه کنید</h1>
+<p class="hero-desc">آزمون‌های هوشمند، رتبه‌بندی لحظه‌ای، پیام‌رسان اختصاصی و گزارش‌های پیشرفته — همه در یک سامانه یکپارچه برای رشد تحصیلی دانش‌آموزان</p>
+<div class="hero-actions">
+<a href="#cta" class="btn-primary">
+شروع کنید
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+</a>
+<a href="#features" class="btn-outline">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+آشنایی با امکانات
+</a>
+</div>
+</div>
+</section>
+<section class="section" id="features">
+<div class="section-header reveal">
+<div class="section-tag">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+امکانات سامانه
+</div>
+<h2 class="section-title">همه چیزی که برای موفقیت نیاز دارید</h2>
+<p class="section-desc">یاران آموز با ابزارهای پیشرفته آموزشی، مسیر یادگیری را هوشمند و لذت‌بخش می‌کند</p>
+</div>
+<div class="features-grid">
+<div class="feature-card reveal">
+<div class="feature-icon fi-blue">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+</div>
+<h3 class="feature-title">آزمون‌های هوشمند</h3>
+<p class="feature-text">سوالات تستی، تشریحی و فایل‌محور با تصحیح خودکار و دستی. هر مرحله با قفل هوشمند بر اساس پیشرفت دانش‌آموز</p>
+</div>
+<div class="feature-card reveal">
+<div class="feature-icon fi-green">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+</div>
+<h3 class="feature-title">رتبه‌بندی لحظه‌ای</h3>
+<p class="feature-text">مقایسه عملکرد دانش‌آموزان در کلاس و پایه تحصیلی با نمودارهای پیشرفت و سیستم امتیازدهی پویا</p>
+</div>
+<div class="feature-card reveal">
+<div class="feature-icon fi-amber">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</div>
+<h3 class="feature-title">پیام‌رسان اختصاصی</h3>
+<p class="feature-text">ارتباط مستقیم دانش‌آموزان با معاونین، کانال اطلاع‌رسانی مدرسه، ارسال فایل و ریاکشن به پیام‌ها</p>
+</div>
+<div class="feature-card reveal">
+<div class="feature-icon fi-sky">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+</div>
+<h3 class="feature-title">گزارش‌های پیشرفته</h3>
+<p class="feature-text">داشبورد تحلیلی کامل با آمار ورود، عملکرد بخش‌ها، فیلترهای زمانی و نمودارهای مقایسه‌ای</p>
+</div>
+<div class="feature-card reveal">
+<div class="feature-icon fi-purple">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+</div>
+<h3 class="feature-title">مسیر یادگیری قفل‌شونده</h3>
+<p class="feature-text">مراحل آموزشی به ترتیب باز می‌شوند. دانش‌آموز باید مرحله قبل را تکمیل کند تا به مرحله بعد دسترسی پیدا کند</p>
+</div>
+<div class="feature-card reveal">
+<div class="feature-icon fi-rose">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+</div>
+<h3 class="feature-title">امنیت کامل</h3>
+<p class="feature-text">ورود با کد ملی، محافظت در برابر حملات بروت‌فورس، توکن CSRF و رمزنگاری پیشرفته اطلاعات</p>
+</div>
+</div>
+</section>
+<section class="section steps-section" id="how">
+<div class="section-header reveal">
+<div class="section-tag">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+نحوه کار
+</div>
+<h2 class="section-title">در سه قدم ساده شروع کنید</h2>
+<p class="section-desc">مسیر یادگیری در یاران آموز ساده و شفاف طراحی شده است</p>
+</div>
+<div class="steps-container">
+<div class="step-row reveal">
+<div class="step-num">۱</div>
+<div class="step-body">
+<h3 class="step-title">ورود با کد ملی</h3>
+<p class="step-text">فقط با وارد کردن کد ملی ۱۰ رقمی خود وارد سامانه شوید. نیازی به رمز عبور نیست. حساب شما توسط مدیر مدرسه ایجاد و مدیریت می‌شود</p>
+</div>
+</div>
+<div class="step-row reveal">
+<div class="step-num">۲</div>
+<div class="step-body">
+<h3 class="step-title">شرکت در آزمون‌ها</h3>
+<p class="step-text">بخش‌های آموزشی را مرور کنید، در مراحل تستی و تشریحی شرکت کنید و فایل‌های پاسخ خود را آپلود نمایید. نتایج تستی بلافاصله مشخص می‌شود</p>
+</div>
+</div>
+<div class="step-row reveal">
+<div class="step-num">۳</div>
+<div class="step-body">
+<h3 class="step-title">کسب امتیاز و رتبه</h3>
+<p class="step-text">با هر پاسخ صحیح امتیاز کسب کنید، در رتبه‌بندی کلاس و پایه بالا بروید و عملکرد خود را در داشبورد شخصی مشاهده نمایید</p>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="showcase">
+<div class="showcase">
+<div class="showcase-visual reveal">
+<div class="showcase-card">
+<div class="showcase-header">
+<div class="showcase-avatar">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+</div>
+<div>
+<div class="showcase-name">داشبورد دانش‌آموز</div>
+<div class="showcase-role">پیشرفت تحصیلی</div>
+</div>
+</div>
+<div class="showcase-bars">
+<div class="sbar">
+<div class="sbar-track"><div class="sbar-fill f1"></div></div>
+<span class="sbar-val">۸۸٪</span>
+</div>
+<div class="sbar">
+<div class="sbar-track"><div class="sbar-fill f2"></div></div>
+<span class="sbar-val">۷۲٪</span>
+</div>
+<div class="sbar">
+<div class="sbar-track"><div class="sbar-fill f3"></div></div>
+<span class="sbar-val">۹۴٪</span>
+</div>
+</div>
+<div class="showcase-mini-cards">
+<div class="smc">
+<div class="smc-value">۱,۲۵۰</div>
+<div class="smc-label">امتیاز کل</div>
+</div>
+<div class="smc">
+<div class="smc-value">۳</div>
+<div class="smc-label">رتبه کلاس</div>
+</div>
+<div class="smc">
+<div class="smc-value">۸۵٪</div>
+<div class="smc-label">پیشرفت</div>
+</div>
+</div>
+</div>
+</div>
+<div class="showcase-info reveal">
+<div class="section-tag">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+داشبورد هوشمند
+</div>
+<h2 class="section-title">عملکرد خود را لحظه‌به‌لحظه ببینید</h2>
+<p class="section-desc">داشبورد یاران آموز تمام اطلاعات تحصیلی شما را در یک نگاه نمایش می‌دهد</p>
+<div class="check-list">
+<div class="check-item">
+<div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+نمایش امتیاز کل و رتبه در کلاس و پایه
+</div>
+<div class="check-item">
+<div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+نمودار پیشرفت هر درس و بخش آموزشی
+</div>
+<div class="check-item">
+<div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+رتبه‌بندی رقابتی بین دانش‌آموزان هم‌پایه
+</div>
+<div class="check-item">
+<div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+پنل مدیریت برای معاونین با دسترسی سطحی
+</div>
+<div class="check-item">
+<div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+حالت تاریک و روشن با طراحی واکنش‌گرا
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cta-section" id="cta">
+<div class="cta-card reveal">
+<h2 class="cta-title">آماده‌اید مسیر موفقیت را شروع کنید؟</h2>
+<p class="cta-desc">همین حالا با کد ملی خود وارد شوید و از امکانات هوشمند یاران آموز بهره‌مند شوید</p>
+<div class="cta-actions">
+<a href="https://app.yaranamooz.ir" class="btn-primary">
+ورود به سامانه
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+</a>
+</div>
+</div>
+</section>
+<footer class="footer" id="contact">
+<div class="footer-inner">
+<div class="footer-top">
+<div class="footer-brand">
+<div class="footer-brand-name">
+<div class="footer-brand-logo">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+</div>
+یاران آموز
+</div>
+</div>
+</div>
+<div class="footer-bottom">
+<span class="footer-copy">© 1405 یاران آموز. تمامی حقوق محفوظ است.</span>
+<a href="#home" class="footer-back-top" aria-label="بازگشت به بالا">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</a>
+</div>
+</div>
+</footer>
+<script>
+(function(){
+'use strict';
+var nav=document.getElementById('nav');
+var mobileBtn=document.getElementById('mobileMenuBtn');
+var mobileMenu=document.getElementById('mobileMenu');
+var mobileClose=document.getElementById('mobileMenuClose');
+window.addEventListener('scroll',function(){
+if(window.scrollY>60)nav.classList.add('scrolled');
+else nav.classList.remove('scrolled');
+},{passive:true});
+mobileBtn.addEventListener('click',function(){
+mobileMenu.classList.add('open');
+document.body.style.overflow='hidden';
+});
+mobileClose.addEventListener('click',function(){
+mobileMenu.classList.remove('open');
+document.body.style.overflow='';
+});
+mobileMenu.querySelectorAll('a').forEach(function(a){
+a.addEventListener('click',function(){
+mobileMenu.classList.remove('open');
+document.body.style.overflow='';
+});
+});
+var reveals=document.querySelectorAll('.reveal');
+var io=new IntersectionObserver(function(entries){
+entries.forEach(function(e){
+if(e.isIntersecting){
+e.target.classList.add('visible');
+io.unobserve(e.target);
+}
+});
+},{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+reveals.forEach(function(el){io.observe(el);});
+var pDigits=['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+function toFa(n){return String(n).replace(/\d/g,function(d){return pDigits[d]});}
+function formatFa(n){return toFa(Number(n).toLocaleString('en-US'));}
+var counters=document.querySelectorAll('[data-count]');
+var cio=new IntersectionObserver(function(entries){
+entries.forEach(function(e){
+if(e.isIntersected){
+e.target.classList.add('visible');
+cio.unobserve(e.target);
+}
+});
+},{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+counters.forEach(function(el){
+var target=parseInt(el.getAttribute('data-count'),10);
+var started=false;
+var observer=new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if(entry.isIntersecting&&!started){
+started=true;
+var duration=2000;
+var start=performance.now();
+function tick(now){
+var elapsed=now-start;
+var progress=Math.min(elapsed/duration,1);
+var eased=1-Math.pow(1-progress,3);
+var current=Math.round(eased*target);
+el.textContent=formatFa(current);
+if(progress<1)requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+observer.unobserve(el);
+}
+});
+},{threshold:0.3});
+observer.observe(el);
+});
+var sBars=document.querySelectorAll('.sbar-fill');
+var sio=new IntersectionObserver(function(entries){
+entries.forEach(function(e){
+if(e.isIntersecting){
+e.target.style.width=e.target.classList.contains('f1')?'88%':e.target.classList.contains('f2')?'72%':'94%';
+sio.unobserve(e.target);
+}
+});
+},{threshold:0.5});
+sBars.forEach(function(b){
+var w=b.style.width;
+b.style.width='0%';
+sio.observe(b);
+});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+a.addEventListener('click',function(e){
+var href=this.getAttribute('href');
+if(href&&href.length>1){
+var target=document.querySelector(href);
+if(target){
+e.preventDefault();
+target.scrollIntoView({behavior:'smooth',block:'start'});
+}
+}
+});
+});
+})();
+</script>
+</body>
+</html>
